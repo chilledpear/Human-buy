@@ -30,6 +30,8 @@ import multipleSell from './src/multipleSell.js'; // Import the new multiple wal
 import multiTimedSell from './src/multiTimedsell.js'; // Import the multi wallet timed sell feature
 import './src/hotkeySell.js';
 import humanbuy from './src/humanbuy.js';
+import trackTokenTransactions from './tracker.js';
+
 
 
 
@@ -77,6 +79,7 @@ async function mainMenu() {
   console.log(chalk.yellow('2:') + chalk.hex('#FF6B6B')(' Sell Modes')); 
   console.log(chalk.yellow('3:') + chalk.hex('#45B7D1')(' Wallets'));
   console.log(chalk.yellow('4:') + chalk.hex('#FF8C42')(' Transfer'));
+  console.log(chalk.yellow('5:') + chalk.hex('#00BFFF')(' Monitoring')); // Add new menu option
   console.log(chalk.yellow('Q:') + chalk.hex('#C04CFD')(' Quit'));
   console.log(chalk.magenta("Hotkey '=' is active globally to sell the last three buyer wallets."));
   console.log(chalk.magenta("Hotkey '/' is active globally to pause/resume any ongoing process."));
@@ -143,6 +146,15 @@ async function transferMenu() {
   return action.toUpperCase();
 }
 
+async function monitoringMenu() {
+  console.clear();
+  console.log(chalk.bgBlue.white('\n=== Monitoring Tools ===\n'));
+  console.log(chalk.yellow('1:') + chalk.hex('#4ECDC4')(' Transaction Tracker'));
+  console.log(chalk.yellow('2:') + chalk.hex('#C04CFD')(' Back to Main Menu'));
+  const action = await promptUser('\n--> ');
+  return action.toUpperCase();
+}
+
 // Main action dispatcher
 async function handleAction(action) {
   switch (action) {
@@ -158,6 +170,10 @@ async function handleAction(action) {
     case '4':
       await handleTransferMenu();
       return;
+      case '5':
+      await handleMonitoringMenu(); // Add new handler
+      return;
+      
     case 'Q':
       console.log(chalk.red("Goodbye"));
       process.exit(0);
@@ -426,6 +442,27 @@ async function handleTransferMenu() {
     default:
       console.log(chalk.red("Invalid input, please try again."));
       await handleTransferMenu();
+  }
+}
+
+async function handleMonitoringMenu() {
+  const action = await monitoringMenu();
+  switch (action) {
+    case '1': {
+      const tokenCA = await promptUser("Enter Token CA to monitor: ");
+      if (!tokenCA) {
+        console.log(chalk.red("Token CA is required"));
+        return;
+      }
+      console.log(chalk.green(`Starting transaction tracker for ${tokenCA}`));
+      await trackTokenTransactions(tokenCA, rl);
+      break;
+    }
+    case '2':
+      return; // Back to Main Menu
+    default:
+      console.log(chalk.red("Invalid input, please try again."));
+      await handleMonitoringMenu();
   }
 }
 
